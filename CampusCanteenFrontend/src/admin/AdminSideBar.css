@@ -1,0 +1,210 @@
+/* =========================================
+   ADMIN SIDEBAR
+   ========================================= */
+
+.admin-sidebar {
+  width: 245px;
+  height: 100vh;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+
+  border-right: 1px solid #eee9e4;
+
+  z-index: 1000;
+
+  overflow: hidden;
+}
+
+/* =========================================
+   LOGO
+   ========================================= */
+
+.admin-logo {
+  height: 90px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 22px;
+
+  border-bottom: 1px solid #eee9e4;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #e8751a;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  box-shadow: 0 4px 10px rgba(232, 117, 26, 0.16);
+}
+
+.admin-logo h2 {
+  margin: 0;
+
+  color: #242424;
+
+  font-size: 19px;
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+.admin-logo span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #999999;
+
+  font-size: 11px;
+}
+
+/* =========================================
+   NAVIGATION
+   ========================================= */
+
+.admin-nav {
+  padding: 28px 14px;
+}
+
+.nav-title {
+  margin: 0 0 12px;
+
+  padding-left: 12px;
+
+  color: #aaa5a0;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1.1px;
+}
+
+/* =========================================
+   NAVIGATION BUTTON
+   ========================================= */
+
+.nav-item {
+  width: 100%;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 5px;
+
+  padding: 0 14px;
+
+  border: none;
+  outline: none;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: #666666;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-item svg {
+  width: 19px;
+  height: 19px;
+
+  flex-shrink: 0;
+
+  stroke-width: 1.9;
+}
+
+/* Hover */
+
+.nav-item:hover {
+  background: #fff7f0;
+
+  color: #e8751a;
+}
+
+/* Active */
+
+.nav-item.active {
+  background: #fff0e4;
+
+  color: #e8751a;
+
+  font-weight: 650;
+
+  box-shadow: inset 3px 0 0 #e8751a;
+}
+
+/* =========================================
+   RESPONSIVE SIDEBAR
+   ========================================= */
+
+@media (max-width: 800px) {
+  .admin-sidebar {
+    width: 72px;
+  }
+
+  .admin-logo {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .admin-logo > div:last-child {
+    display: none;
+  }
+
+  .admin-nav {
+    padding: 24px 9px;
+  }
+
+  .nav-title {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+}
