@@ -1,6 +1,4 @@
-import { useMemo, useState } from "react";
-
-import { menuItems } from "../data/menuData";
+import { useEffect, useMemo, useState } from "react";
 
 import "./Menu.css";
 
@@ -8,9 +6,11 @@ import Sidebar from "../menu/SiderBar";
 import TopBar from "../menu/TopBar";
 import FoodCard from "../menu/FoodCard";
 import Cart from "../menu/Cart";
-import CategoryBar from "../menu/CategoryBar";
+import api from "../api/AxiosConfig";
 
+// =========================
 // CANTEEN MEAL TIMINGS
+// =========================
 
 const mealSchedule = [
   {
@@ -20,7 +20,6 @@ const mealSchedule = [
     time: "07:00 - 11:00",
     icon: "☀️",
   },
-
   {
     name: "Lunch",
     start: 11,
@@ -28,7 +27,6 @@ const mealSchedule = [
     time: "11:00 - 15:00",
     icon: "🍛",
   },
-
   {
     name: "Snacks",
     start: 15,
@@ -36,7 +34,6 @@ const mealSchedule = [
     time: "15:00 - 18:00",
     icon: "🍪",
   },
-
   {
     name: "Dinner",
     start: 18,
@@ -46,7 +43,9 @@ const mealSchedule = [
   },
 ];
 
+// =========================
 // GET CURRENT MEAL
+// =========================
 
 const getCurrentMeal = () => {
   const now = new Date();
@@ -60,7 +59,9 @@ const getCurrentMeal = () => {
   );
 };
 
+// =========================
 // MENU COMPONENT
+// =========================
 
 function Menu() {
   const [activeCategory, setActiveCategory] = useState("All Items");
@@ -69,30 +70,76 @@ function Menu() {
 
   const [cart, setCart] = useState([]);
 
+  // =========================
+  // DATABASE MENU ITEMS
+  // =========================
+
+  const [menuItems, setMenuItems] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+  // =========================
   // CURRENT MEAL
+  // =========================
 
   const currentMeal = useMemo(() => {
     return getCurrentMeal();
   }, []);
 
+  // =========================
+  // FETCH MENU FROM BACKEND
+  // =========================
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await api.get("/v1/menu-items", {
+          params: {
+            available: true,
+          },
+        });
+
+        setMenuItems(response.data);
+      } catch (error) {
+        console.error("Failed to fetch menu items:", error);
+
+        setError("Unable to load menu items. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
+
+  // =========================
   // FILTER MENU ITEMS
+  // =========================
 
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
       // Category filter
       const categoryMatch =
-        activeCategory === "All Items" || item.category === activeCategory;
+        activeCategory === "All Items" ||
+        item.category?.toLowerCase() === activeCategory.toLowerCase();
 
       // Search filter
       const searchMatch = item.name
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(search.toLowerCase());
 
       return categoryMatch && searchMatch;
     });
-  }, [activeCategory, search]);
+  }, [menuItems, activeCategory, search]);
 
+  // =========================
   // ADD TO CART
+  // =========================
 
   const addToCart = (item) => {
     setCart((previousCart) => {
@@ -100,7 +147,6 @@ function Menu() {
         (cartItem) => cartItem.id === item.id,
       );
 
-      // Already exists
       if (existingItem) {
         return previousCart.map((cartItem) =>
           cartItem.id === item.id ?
@@ -112,10 +158,8 @@ function Menu() {
         );
       }
 
-      // New item
       return [
         ...previousCart,
-
         {
           ...item,
           quantity: 1,
@@ -124,7 +168,9 @@ function Menu() {
     });
   };
 
+  // =========================
   // INCREASE QUANTITY
+  // =========================
 
   const increaseQuantity = (id) => {
     setCart((previousCart) =>
@@ -139,7 +185,9 @@ function Menu() {
     );
   };
 
+  // =========================
   // DECREASE QUANTITY
+  // =========================
 
   const decreaseQuantity = (id) => {
     setCart((previousCart) =>
@@ -152,18 +200,21 @@ function Menu() {
             }
           : item,
         )
-
         .filter((item) => item.quantity > 0),
     );
   };
 
+  // =========================
   // REMOVE ITEM
+  // =========================
 
   const removeItem = (id) => {
     setCart((previousCart) => previousCart.filter((item) => item.id !== id));
   };
 
+  // =========================
   // UI
+  // =========================
 
   return (
     <div className="menu-page">
@@ -181,16 +232,7 @@ function Menu() {
 
         <TopBar search={search} setSearch={setSearch} />
 
-        {/* CATEGORIES */}
-
-        {/* <CategoryBar
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-        /> */}
-
-        {/* =========================
-            PROMOTIONAL BANNER
-        ========================= */}
+        {/* PROMOTIONAL BANNER */}
 
         <section className="promo-banner">
           <div className="promo-content">
@@ -202,9 +244,7 @@ function Menu() {
           </div>
         </section>
 
-        {/* =========================
-            CURRENT MEAL
-        ========================= */}
+        {/* CURRENT MEAL */}
 
         <section className="availability">
           <div className="availability-icon">
@@ -233,13 +273,11 @@ function Menu() {
           </div>
         </section>
 
-        {/* =========================
-            MENU HEADING
-        ========================= */}
+        {/* MENU HEADING */}
 
         <div className="menu-heading">
           <div>
-            <span>{"Today's selection"}</span>
+            <span>Today's selection</span>
 
             <h1>
               {activeCategory === "All Items" ? "Canteen Menu" : activeCategory}
@@ -252,27 +290,49 @@ function Menu() {
           </span>
         </div>
 
-        {/* =========================
-            FOOD GRID
-        ========================= */}
+        {/* LOADING */}
 
-        {filteredItems.length > 0 ?
+        {loading && (
+          <div className="no-results">
+            <h2>Loading menu...</h2>
+            <p>Please wait while we fetch today's items.</p>
+          </div>
+        )}
+
+        {/* ERROR */}
+
+        {!loading && error && (
+          <div className="no-results">
+            <h2>Something went wrong</h2>
+
+            <p>{error}</p>
+
+            <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        )}
+
+        {/* FOOD GRID */}
+
+        {!loading && !error && filteredItems.length > 0 && (
           <div className="food-grid">
             {filteredItems.map((item) => (
               <FoodCard key={item.id} item={item} onAdd={addToCart} />
             ))}
           </div>
-        : <div className="no-results">
+        )}
+
+        {/* NO RESULTS */}
+
+        {!loading && !error && filteredItems.length === 0 && (
+          <div className="no-results">
             <h2>No items found</h2>
 
             <p>Try another category or search term.</p>
           </div>
-        }
+        )}
       </main>
 
-      {/* =========================
-          CART
-      ========================= */}
+      {/* CART */}
 
       <Cart
         cart={cart}

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import axios from "axios";
 import "./AddMenuItem.css";
+import { addMenuItem } from "../api/menuService";
 
-function AddMenuItem({ onClose }) {
+function AddMenuItem({ onClose, onItemAdded }) {
   const [formData, setFormData] = useState({
     name: "",
     category: "Main Course",
@@ -31,28 +31,32 @@ function AddMenuItem({ onClose }) {
     setError("");
 
     try {
-      const response = await addMenuItem();
-      axios.post("http://localhost:8080/api/menu-items", {
+      const data = {
         name: formData.name,
         category: formData.category,
         meal: formData.meal,
         price: Number(formData.price),
         imageUrl: formData.imageUrl,
         available: formData.available,
-      });
+      };
 
-      console.log("Item added:", response.data);
+      console.log("Sending:", data);
 
-      alert("Menu item added successfully! 🎉");
+      const savedItem = await addMenuItem(data);
+
+      console.log("Saved:", savedItem);
+
+      alert("Menu item added successfully!");
+
+      if (onItemAdded) {
+        onItemAdded(savedItem);
+      }
 
       onClose();
     } catch (error) {
-      console.error("Error adding menu item:", error);
+      console.error("Failed to add menu item:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Failed to add menu item. Please try again.",
-      );
+      setError(error.response?.data?.message || "Failed to add menu item");
     } finally {
       setLoading(false);
     }
@@ -61,33 +65,24 @@ function AddMenuItem({ onClose }) {
   return (
     <div className="model-overlay">
       <div className="menu-model">
-        {/* Header */}
-
         <div className="model-header">
           <div>
             <span>Menu Management</span>
             <h2>Add New Item</h2>
           </div>
 
-          <button type="button" className="modal-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose}>
             ×
           </button>
         </div>
 
-        {/* Error */}
-
-        {error && <div className="form-error">{error}</div>}
-
-        {/* Form */}
-
         <form className="menu-form" onSubmit={handleSubmit}>
-          {/* Item Name */}
+          {/* ITEM NAME */}
 
           <div className="form-group full">
-            <label htmlFor="name">Item Name</label>
+            <label>Item Name</label>
 
             <input
-              id="name"
               type="text"
               name="name"
               value={formData.name}
@@ -97,13 +92,12 @@ function AddMenuItem({ onClose }) {
             />
           </div>
 
-          {/* Category */}
+          {/* CATEGORY */}
 
           <div className="form-group">
-            <label htmlFor="category">Category</label>
+            <label>Category</label>
 
             <select
-              id="category"
               name="category"
               value={formData.category}
               onChange={handleChange}>
@@ -117,16 +111,12 @@ function AddMenuItem({ onClose }) {
             </select>
           </div>
 
-          {/* Meal */}
+          {/* MEAL */}
 
           <div className="form-group">
-            <label htmlFor="meal">Meal</label>
+            <label>Meal</label>
 
-            <select
-              id="meal"
-              name="meal"
-              value={formData.meal}
-              onChange={handleChange}>
+            <select name="meal" value={formData.meal} onChange={handleChange}>
               <option value="Breakfast">Breakfast</option>
 
               <option value="Lunch">Lunch</option>
@@ -137,13 +127,12 @@ function AddMenuItem({ onClose }) {
             </select>
           </div>
 
-          {/* Price */}
+          {/* PRICE */}
 
           <div className="form-group">
-            <label htmlFor="price">Price</label>
+            <label>Price</label>
 
             <input
-              id="price"
               type="number"
               name="price"
               value={formData.price}
@@ -154,22 +143,21 @@ function AddMenuItem({ onClose }) {
             />
           </div>
 
-          {/* Image URL */}
+          {/* IMAGE */}
 
           <div className="form-group">
-            <label htmlFor="imageUrl">Image URL</label>
+            <label>Image URL</label>
 
             <input
-              id="imageUrl"
               type="text"
               name="imageUrl"
               value={formData.imageUrl}
               onChange={handleChange}
-              placeholder="/images/food.png"
+              placeholder="https://example.com/food.jpg"
             />
           </div>
 
-          {/* Availability */}
+          {/* AVAILABILITY */}
 
           <div className="availability-toggle">
             <label className="switch">
@@ -190,7 +178,11 @@ function AddMenuItem({ onClose }) {
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* ERROR */}
+
+          {error && <p className="form-error">{error}</p>}
+
+          {/* BUTTONS */}
 
           <div className="modal-actions">
             <button

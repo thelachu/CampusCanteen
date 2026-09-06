@@ -4,24 +4,32 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Getter
-@Setter
-@Table(name = "cart_items")
-public class CartItem {
+import java.math.BigDecimal;
 
+@Entity
+@Setter
+@Getter
+@Table(name = "order_items")
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cart")
-    private Cart cart;
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     @ManyToOne
     @JoinColumn(name = "menu_item_id")
     private MenuItem menuItem;
 
+    private String itemName;
+
+    private BigDecimal price;
+
     private Integer quantity;
+
+    private BigDecimal subTotal;
+
 
 }
